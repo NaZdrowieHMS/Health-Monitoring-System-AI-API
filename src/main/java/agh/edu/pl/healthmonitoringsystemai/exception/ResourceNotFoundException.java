@@ -1,4 +1,4 @@
-package agh.edu.pl.hms.exception;
+package agh.edu.pl.healthmonitoringsystemai.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message) {
