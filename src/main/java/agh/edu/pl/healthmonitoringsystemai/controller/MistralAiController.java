@@ -1,8 +1,6 @@
 package agh.edu.pl.healthmonitoringsystemai.controller;
 
 import agh.edu.pl.healthmonitoringsystemai.exception.response.ErrorResponse;
-import agh.edu.pl.healthmonitoringsystemai.mistralAi.model.AiReport;
-import agh.edu.pl.healthmonitoringsystemai.mistralAi.service.AiReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,14 +14,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
+import agh.edu.pl.healthmonitoringsystemai.mistralAi.MistralAIService;
+
+
 @RestController
-@RequestMapping(path = "/api/patients/ai-health-report")
-public class AiReportController {
+@RequestMapping(path = "/api/ai/report")
+public class MistralAiController {
 
-    private final AiReportService aiReportService;
+    private final MistralAIService mistralService;
 
-    public AiReportController(AiReportService aiReportService) {
-        this.aiReportService = aiReportService;
+    public MistralAiController(MistralAIService mistralService) {
+        this.mistralService = mistralService;
     }
 
     @GetMapping("/{formId}")
@@ -31,17 +32,20 @@ public class AiReportController {
             summary = "Get Ai health report based on a specific form.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful operation",
-                            content = @Content(schema = @Schema(implementation = AiReport.class))),
+//                            content = @Content(schema = @Schema(implementation = AiReport.class))),
+                            content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "404", description = "Not found",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = "Server error",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema =  @Schema(implementation = ErrorResponse.class))),
             },
-            tags = {"Health Form"}
+            tags = {"Mistral AI"}
     )
-    public ResponseEntity<AiReport> getAiReportBasedOnForm(@Parameter(description = "Form ID") @PathVariable("formId") Long formId) {
+    public ResponseEntity<String> getAiReportBasedOnForm(@Parameter(description = "Form ID") @PathVariable("formId") Long formId) {
 
-        AiReport aiHealthReport = aiReportService.getAiReportBasedOnForm(formId);
+//        AiReport aiHealthReport = aiReportService.getAiReportBasedOnForm(formId);
+//        return ResponseEntity.ok(aiHealthReport);
+        String aiHealthReport = mistralService.getAiReportBasedOnForm(formId);
         return ResponseEntity.ok(aiHealthReport);
     }
 }
