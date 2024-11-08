@@ -22,8 +22,13 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/api/test")
 public class TestRetrofitController {
-    RetrofitClient retrofitClient = new RetrofitClient();
-    PatientApi patientApi = retrofitClient.getRetrofitClient().create(PatientApi .class);
+
+    private final PatientApi patientApi;
+
+    public TestRetrofitController(RetrofitClient retrofitClient) {
+        this.patientApi = retrofitClient.getRetrofitClient().create(PatientApi.class);
+    }
+
 
     @Operation(
             summary = "Retrofit test result",

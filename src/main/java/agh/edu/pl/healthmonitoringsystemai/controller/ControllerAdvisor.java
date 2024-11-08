@@ -1,5 +1,6 @@
 package agh.edu.pl.healthmonitoringsystemai.controller;
 
+import agh.edu.pl.healthmonitoringsystemai.exception.MistralApiException;
 import agh.edu.pl.healthmonitoringsystemai.exception.ResourceNotFoundException;
 import agh.edu.pl.healthmonitoringsystemai.exception.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -18,5 +19,12 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         log.error("A ResourceNotFoundException occurred: {}", ex.getMessage(), ex);
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MistralApiException.class)
+    public final ResponseEntity<ErrorResponse> handleMistralApiException(MistralApiException ex) {
+        log.error("A MistralApiException occurred: {}", ex.getMessage(), ex);
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

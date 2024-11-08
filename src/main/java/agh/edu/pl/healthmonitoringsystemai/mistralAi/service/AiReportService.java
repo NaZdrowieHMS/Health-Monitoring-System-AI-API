@@ -1,9 +1,9 @@
-package agh.edu.pl.healthmonitoringsystemai.service;
+package agh.edu.pl.healthmonitoringsystemai.mistralAi.service;
 
 import agh.edu.pl.healthmonitoringsystem.client.FormApi;
 import agh.edu.pl.healthmonitoringsystem.response.Form;
 import agh.edu.pl.healthmonitoringsystemai.client.RetrofitClient;
-import agh.edu.pl.healthmonitoringsystemai.model.AiReport;
+import agh.edu.pl.healthmonitoringsystemai.mistralAi.model.AiReport;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
 

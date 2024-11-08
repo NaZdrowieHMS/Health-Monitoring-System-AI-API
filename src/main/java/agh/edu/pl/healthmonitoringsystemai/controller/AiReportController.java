@@ -1,8 +1,8 @@
 package agh.edu.pl.healthmonitoringsystemai.controller;
 
 import agh.edu.pl.healthmonitoringsystemai.exception.response.ErrorResponse;
-import agh.edu.pl.healthmonitoringsystemai.model.AiReport;
-import agh.edu.pl.healthmonitoringsystemai.service.AiReportService;
+import agh.edu.pl.healthmonitoringsystemai.mistralAi.model.AiReport;
+import agh.edu.pl.healthmonitoringsystemai.mistralAi.service.AiReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(path = "/api/patients/ai-health-report")
 public class AiReportController {
+
     private final AiReportService aiReportService;
 
     public AiReportController(AiReportService aiReportService) {
