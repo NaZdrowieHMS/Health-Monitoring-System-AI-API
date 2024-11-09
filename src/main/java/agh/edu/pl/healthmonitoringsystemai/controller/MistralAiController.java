@@ -1,7 +1,7 @@
 package agh.edu.pl.healthmonitoringsystemai.controller;
 
+import agh.edu.pl.healthmonitoringsystem.response.AiFormAnalysis;
 import agh.edu.pl.healthmonitoringsystemai.exception.response.ErrorResponse;
-import agh.edu.pl.healthmonitoringsystemai.mistralAi.AiFormAnalysis;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

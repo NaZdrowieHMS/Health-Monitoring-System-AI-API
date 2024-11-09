@@ -1,5 +1,7 @@
 package agh.edu.pl.healthmonitoringsystemai.mistralAi;
 
+import agh.edu.pl.healthmonitoringsystem.request.AiFormAnalysisRequest;
+import agh.edu.pl.healthmonitoringsystem.response.AiFormAnalysis;
 import agh.edu.pl.healthmonitoringsystem.response.Form;
 import agh.edu.pl.healthmonitoringsystemai.exception.MistralApiException;
 import agh.edu.pl.healthmonitoringsystemai.util.JsonSanitizer;
@@ -33,7 +35,8 @@ public class MistralAIService {
         Prompt prompt = createPrompt(form);
         ChatResponse chatResponse = executeChatRequest(prompt);
         AiAnalysisOutput aiOutput = parseChatResponse(chatResponse);
-        return mapToAiFormAnalysis(form, aiOutput);
+        AiFormAnalysisRequest request = createRequest(aiOutput, form);
+        return formService.saveFormAnalysis(request);
     }
 
     private Prompt createPrompt(Form form) {
@@ -55,7 +58,12 @@ public class MistralAIService {
         return outputParser.parse(jsonContent);
     }
 
-    private AiFormAnalysis mapToAiFormAnalysis(Form form, AiAnalysisOutput output) {
-        return new AiFormAnalysis(form.patientId(), form.id(), output.diagnoses(), output.recommendations());
+    private AiFormAnalysisRequest createRequest(AiAnalysisOutput output, Form form) {
+        return AiFormAnalysisRequest.builder()
+                .formId(form.id())
+                .patientId(form.patientId())
+                .diagnoses(output.diagnoses())
+                .recommendations(output.recommendations())
+                .build();
     }
 }
