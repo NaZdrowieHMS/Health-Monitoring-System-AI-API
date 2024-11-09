@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/test")
+@RequestMapping(path = "/api/ai/test")
 public class TestRetrofitController {
 
     private final PatientApi patientApi;

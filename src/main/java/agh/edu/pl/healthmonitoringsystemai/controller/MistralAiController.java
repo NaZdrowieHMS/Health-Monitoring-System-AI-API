@@ -1,6 +1,7 @@
 package agh.edu.pl.healthmonitoringsystemai.controller;
 
 import agh.edu.pl.healthmonitoringsystemai.exception.response.ErrorResponse;
+import agh.edu.pl.healthmonitoringsystemai.mistralAi.AiFormAnalysis;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,34 +19,33 @@ import agh.edu.pl.healthmonitoringsystemai.mistralAi.MistralAIService;
 
 
 @RestController
-@RequestMapping(path = "/api/ai/report")
+@RequestMapping(path = "/api/ai/forms/")
 public class MistralAiController {
 
-    private final MistralAIService mistralService;
+    private final MistralAIService mistralAiService;
 
-    public MistralAiController(MistralAIService mistralService) {
-        this.mistralService = mistralService;
+    public MistralAiController(MistralAIService mistralAiService) {
+        this.mistralAiService = mistralAiService;
     }
 
-    @GetMapping("/{formId}")
+    @GetMapping("/{formId}/analysis")
     @Operation(
             summary = "Get Ai health report based on a specific form.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful operation",
-//                            content = @Content(schema = @Schema(implementation = AiReport.class))),
-                            content = @Content(schema = @Schema(implementation = String.class))),
+                            content = @Content(schema = @Schema(implementation = AiFormAnalysis.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid Request",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "404", description = "Not found",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = "Server error",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema =  @Schema(implementation = ErrorResponse.class))),
             },
-            tags = {"Mistral AI"}
+            tags = {"AI Form Analysis"}
     )
-    public ResponseEntity<String> getAiReportBasedOnForm(@Parameter(description = "Form ID") @PathVariable("formId") Long formId) {
+    public ResponseEntity<AiFormAnalysis> getAiAnalysisBasedOnForm(@Parameter(description = "Form ID") @PathVariable("formId") Long formId) {
 
-//        AiReport aiHealthReport = aiReportService.getAiReportBasedOnForm(formId);
-//        return ResponseEntity.ok(aiHealthReport);
-        String aiHealthReport = mistralService.getAiReportBasedOnForm(formId);
-        return ResponseEntity.ok(aiHealthReport);
+        AiFormAnalysis aiFormAnalysis = mistralAiService.getAiAnalysisBasedOnForm(formId);
+        return ResponseEntity.ok(aiFormAnalysis);
     }
 }
