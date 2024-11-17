@@ -12,9 +12,9 @@ import java.util.Base64;
 @Component
 public class ImageDecoder {
 
-    public BufferedImage decodeBase64Image(String base64Str) {
+    public BufferedImage decodeBase64Image(String base64Data) {
         try {
-            String base64Data = extractBase64Data(base64Str);
+//            String base64Data = extractBase64Data(base64Str);
             byte[] imageBytes = Base64.getDecoder().decode(base64Data);
             return ImageIO.read(new ByteArrayInputStream(imageBytes));
         } catch (Exception ex) {

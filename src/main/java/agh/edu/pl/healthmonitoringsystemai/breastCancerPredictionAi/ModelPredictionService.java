@@ -1,48 +1,51 @@
 package agh.edu.pl.healthmonitoringsystemai.breastCancerPredictionAi;
 
+import agh.edu.pl.healthmonitoringsystem.request.PredictionRequest;
+import agh.edu.pl.healthmonitoringsystem.response.Prediction;
+import agh.edu.pl.healthmonitoringsystem.response.ResultDataContent;
 import agh.edu.pl.healthmonitoringsystemai.exception.PredictionException;
 import ai.onnxruntime.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
+
 @Service
-public class PredictionService {
+public class ModelPredictionService {
 
     private final ImagePreprocessor imagePreprocessor;
     private final OnnxModel aiModel;
     private static final String[] CLASS_NAMES = {"benign", "malignant", "normal"};
 
     @Autowired
-    public PredictionService(ImagePreprocessor imagePreprocessor, OnnxModel aiModel) {
+    public ModelPredictionService(ImagePreprocessor imagePreprocessor, OnnxModel aiModel) {
         this.imagePreprocessor = imagePreprocessor;
         this.aiModel = aiModel;
     }
 
-    public void predict(PredictionRequest request) {
-        // TODO returned value should be Prediction (not void)
+    public PredictionResult predict(ResultDataContent resultDataContent) {
         try {
-            float[][][][] imageData = preprocessImage(request);
+            float[][][][] imageData = imagePreprocessor.preprocessImage(resultDataContent.data());
             float[][] predictions = runInference(imageData);
-            String result = postProcessPredictions(predictions);
+            PredictionResult result = postProcessPredictions(predictions);
             System.out.println(result);
-        } catch (OrtException e) {
+            return result;
+        } catch (Exception e) {
             throw new PredictionException(e.getMessage());
         }
-    }
-
-    private float[][][][] preprocessImage(PredictionRequest request) {
-        return imagePreprocessor.preprocessImage(request.getImageBase64());
     }
 
     private float[][] runInference(float[][][][] imageData) throws OrtException {
         return aiModel.run(imageData);
     }
 
-    private String postProcessPredictions(float[][] predictions) {
+    private PredictionResult postProcessPredictions(float[][] predictions) {
         int predictedClassIndex = getPredictedClassIndex(predictions[0]);
-        float confidence = predictions[0][predictedClassIndex];
-        return String.format("Predicted class: %s\nConfidence: %.2f%%",
-                CLASS_NAMES[predictedClassIndex], confidence * 100);
+        double confidence = predictions[0][predictedClassIndex];
+        return new PredictionResult(CLASS_NAMES[predictedClassIndex], confidence * 100);
+
+//        return String.format("Predicted class: %s\nConfidence: %.2f%%",
+//                CLASS_NAMES[predictedClassIndex], confidence * 100);
     }
 
     private int getPredictedClassIndex(float[] predictions) {
