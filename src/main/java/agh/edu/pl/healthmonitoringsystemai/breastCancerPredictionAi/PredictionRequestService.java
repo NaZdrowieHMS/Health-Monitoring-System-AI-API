@@ -68,7 +68,6 @@ public class PredictionRequestService {
 
     @Async
     protected void processPredictionAsync(PredictionSummary predictionSummary) {
-        try {
             List<Double> confidences = new ArrayList<>();
             List<String> predictions = new ArrayList<>();
             Long requestId = predictionSummary.id();
@@ -76,11 +75,20 @@ public class PredictionRequestService {
             for (Long resultId : predictionSummary.resultIds()) {
                 try {
                     Prediction existingPrediction = predictionApi.getPredictionForResult(resultId).execute().body();
-
                     if (existingPrediction != null) {
                         confidences.add(existingPrediction.confidence());
                         predictions.add(existingPrediction.prediction());
-                    } else {
+                        }
+                } catch (Exception e) {
+                    log.error("Error processing resultId: {}", resultId, e);
+//                }
+//
+//                    if (existingPrediction != null) {
+//                        confidences.add(existingPrediction.confidence());
+//                        predictions.add(existingPrediction.prediction());
+//                    } else {
+
+                    try{
                         ResultDataContent resultData = predictionApi.getPredictionDataFromResult(resultId).execute().body();
                         PredictionResult newPredictionResult = modelPredictionService.predict(resultData);
 
@@ -96,30 +104,30 @@ public class PredictionRequestService {
 
                         confidences.add(savedPrediction.confidence());
                         predictions.add(savedPrediction.prediction());
-                    }
-                } catch (Exception e) {
-                    log.error("Error processing resultId: {}", resultId, e);
+
+                } catch (Exception ex) {
+                    log.error("Error processing resultId: {}", resultId, ex);
                 }
             }
 
-            if (confidences.isEmpty()) {
-                throw new PredictionException("No predictions were processed for request ID: " + requestId);
-            }
-
-            double averageConfidence = countAverageConfidence(confidences);
-
-
-            updatePredictionRequestStatus(predictionSummary.id(), PredictionRequestStatus.COMPLETED, averageConfidence,
-                    predictions.getFirst()); //TODO: not first predict please
-
-        } catch (Exception e) {
-            log.error("Error during asynchronous prediction processing", e);
-            try {
-                //updatePredictionRequestStatus(predictionSummary.id(), PredictionRequestStatus.FAILED, null, null); //TODO: update to fail
-
-            } catch (Exception innerEx) {
-                log.error("Failed to update prediction summary to FAILED status", innerEx);
-            }
+//            if (confidences.isEmpty()) {
+//                throw new PredictionException("No predictions were processed for request ID: " + requestId);
+//            }
+//
+//            double averageConfidence = countAverageConfidence(confidences);
+//
+//
+//            updatePredictionRequestStatus(predictionSummary.id(), PredictionRequestStatus.COMPLETED, averageConfidence,
+//                    predictions.getFirst()); //TODO: not first predict please
+//
+//        } catch (Exception e) {
+//            log.error("Error during asynchronous prediction processing", e);
+//            try {
+//                //updatePredictionRequestStatus(predictionSummary.id(), PredictionRequestStatus.FAILED, null, null); //TODO: update to fail
+//
+//            } catch (Exception innerEx) {
+//                log.error("Failed to update prediction summary to FAILED status", innerEx);
+//            }
         }
     }
 
