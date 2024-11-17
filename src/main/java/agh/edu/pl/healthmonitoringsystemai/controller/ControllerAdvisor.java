@@ -1,7 +1,10 @@
 package agh.edu.pl.healthmonitoringsystemai.controller;
 
 import agh.edu.pl.healthmonitoringsystemai.exception.ApiException;
+import agh.edu.pl.healthmonitoringsystemai.exception.HuggingFaceApiException;
+import agh.edu.pl.healthmonitoringsystemai.exception.InvalidImageException;
 import agh.edu.pl.healthmonitoringsystemai.exception.MistralApiException;
+import agh.edu.pl.healthmonitoringsystemai.exception.PredictionException;
 import agh.edu.pl.healthmonitoringsystemai.exception.ResourceNotFoundException;
 import agh.edu.pl.healthmonitoringsystemai.exception.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +25,13 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(InvalidImageException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidImageException(InvalidImageException ex) {
+        log.error("A InvalidImageException occurred: {}", ex.getMessage(), ex);
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(MistralApiException.class)
     public final ResponseEntity<ErrorResponse> handleMistralApiException(MistralApiException ex) {
         log.error("A MistralApiException occurred: {}", ex.getMessage(), ex);
@@ -29,8 +39,22 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(HuggingFaceApiException.class)
+    public final ResponseEntity<ErrorResponse> handleHuggingFaceApiException(HuggingFaceApiException ex) {
+        log.error("A HuggingFaceApiException occurred: {}", ex.getMessage(), ex);
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(PredictionException.class)
+    public final ResponseEntity<ErrorResponse> handlePredictionException(PredictionException ex) {
+        log.error("A PredictionException occurred: {}", ex.getMessage(), ex);
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(ApiException.class)
-    public final ResponseEntity<ErrorResponse> handleMistralApiException(ApiException ex) {
+    public final ResponseEntity<ErrorResponse> handleApiException(ApiException ex) {
         log.error("A ApiException occurred: {}", ex.getMessage(), ex);
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
