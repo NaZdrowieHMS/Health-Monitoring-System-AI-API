@@ -1,7 +1,5 @@
 package agh.edu.pl.healthmonitoringsystemai.breastCancerPredictionAi;
 
-import agh.edu.pl.healthmonitoringsystem.request.PredictionRequest;
-import agh.edu.pl.healthmonitoringsystem.response.Prediction;
 import agh.edu.pl.healthmonitoringsystem.response.ResultDataContent;
 import agh.edu.pl.healthmonitoringsystemai.exception.PredictionException;
 import ai.onnxruntime.*;
@@ -43,9 +41,6 @@ public class ModelPredictionService {
         int predictedClassIndex = getPredictedClassIndex(predictions[0]);
         double confidence = predictions[0][predictedClassIndex];
         return new PredictionResult(CLASS_NAMES[predictedClassIndex], confidence * 100);
-
-//        return String.format("Predicted class: %s\nConfidence: %.2f%%",
-//                CLASS_NAMES[predictedClassIndex], confidence * 100);
     }
 
     private int getPredictedClassIndex(float[] predictions) {
