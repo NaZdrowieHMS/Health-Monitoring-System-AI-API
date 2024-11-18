@@ -9,7 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.mistralai.MistralAiChatModel;
+import org.springframework.ai.mistralai.api.MistralAiApi;
 import org.springframework.ai.parser.BeanOutputParser;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +19,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class MistralAIService {
 
+    @Value("${spring.ai.mistralai.api-key}")
+    private String apiKey;
+
     private final MistralAiChatModel chatModel;
     private final PromptCreator promptCreator;
     private final FormService formService;
     private final BeanOutputParser<AiAnalysisOutput> outputParser;
 
     @Autowired
-    public MistralAIService(MistralAiChatModel chatModel, PromptCreator promptCreator, FormService formService) {
-        this.chatModel = chatModel;
+    public MistralAIService(PromptCreator promptCreator, FormService formService) {
+        this.chatModel = new MistralAiChatModel(new MistralAiApi(apiKey));
         this.promptCreator = promptCreator;
         this.formService = formService;
         this.outputParser = new BeanOutputParser<>(AiAnalysisOutput.class);

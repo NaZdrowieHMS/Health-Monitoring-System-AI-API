@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  hms:
+    build:
+      context: ../../Backend-API/Health-Monitoring-System-API/HealthMonitoringSystemApplication/ # Path for directory with Dockerfile for HMS backend service
+      args:
+        GITHUB_USERNAME: ""
+        GITHUB_TOKEN: ""
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL= # database url
+      - DATABASE_USERNAME= # database username
+      - DATABASE_PASSWORD= # database password
+
+  aiservice:
+    build:
+      context: ./  # Path for directory with Dockerfile for HMS AI Service
+      args:
+        GITHUB_USERNAME: ""
+        GITHUB_TOKEN: ""
+    ports:
+      - "8081:8081"
+    environment:
+      - HMS_API_BASE_URL=http://hms:8080
+      - AI_MISTRALAI_API_KEY= # ai mistral api key
+      - AI_HUGGING_FACE_BASE_URL=https://huggingface.co/HealthMonitoringSystem/Breast_Cancer_Prediction_AI_Model/resolve/main/model.onnx
+      - AI_HUGGING_FACE_API_KEY= # hugging face api key
+    depends_on:
+      - hms
