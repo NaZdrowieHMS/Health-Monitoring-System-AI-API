@@ -39,5 +39,5 @@ services:
 docker-compose up --build
 ```
 
-
+Our deployment branch is: **deploy**
 
