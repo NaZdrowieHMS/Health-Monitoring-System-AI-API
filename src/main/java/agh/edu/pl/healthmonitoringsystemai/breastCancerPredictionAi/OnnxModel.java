@@ -3,16 +3,17 @@ package agh.edu.pl.healthmonitoringsystemai.breastCancerPredictionAi;
 import agh.edu.pl.healthmonitoringsystemai.client.HuggingFaceClient;
 import ai.onnxruntime.*;
 import jakarta.annotation.PreDestroy;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
+@Slf4j
 @Component
 @DependsOn("huggingFaceClient")
 public class OnnxModel {
@@ -45,9 +46,8 @@ public class OnnxModel {
 
     @PreDestroy
     public void close() throws OrtException {
+        log.info("Closing ONNX session and environment.");
         session.close();
         env.close();
     }
-
 }
-
