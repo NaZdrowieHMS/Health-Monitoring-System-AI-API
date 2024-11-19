@@ -2,7 +2,9 @@ package agh.edu.pl.healthmonitoringsystemai.breastCancerPredictionAi;
 
 import agh.edu.pl.healthmonitoringsystemai.client.HuggingFaceClient;
 import ai.onnxruntime.*;
+import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -12,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 
 @Component
+@DependsOn("huggingFaceClient")
 public class OnnxModel {
 
     private static final String MODEL_PATH = "model.onnx";
@@ -19,7 +22,7 @@ public class OnnxModel {
     private final OrtSession session;
 
     @Autowired
-    public OnnxModel(HuggingFaceClient huggingFaceClient) throws OrtException, IOException {
+    public OnnxModel(HuggingFaceClient huggingFaceClient) throws OrtException {
         this.env = OrtEnvironment.getEnvironment();
 
         if (!isModelPresent()) {
@@ -39,5 +42,12 @@ public class OnnxModel {
         OrtSession.Result result = session.run(Collections.singletonMap("input", inputTensor));
         return (float[][]) result.get(0).getValue();
     }
+
+    @PreDestroy
+    public void close() throws OrtException {
+        session.close();
+        env.close();
+    }
+
 }
 
