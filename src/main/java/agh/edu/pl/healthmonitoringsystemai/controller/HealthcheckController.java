@@ -11,21 +11,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(path = "/api/ai/health/status")
+@RequestMapping(path = "/health")
 public class HealthcheckController {
 
     @GetMapping
     @Operation(
-            summary = "Check if health of ai system is ready.",
+            summary = "Check if ai health monitoring system is ready.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "OK",
-                            content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema =  @Schema())),
-                    @ApiResponse(responseCode = "500", description = "Not OK",
-                            content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema =  @Schema())),
+                    @ApiResponse(responseCode = "200", description = "Healthy",
+                            content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema =  @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "500", description = "Not healthy",
+                            content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema =  @Schema(implementation = String.class))),
             },
-            tags = {"Readiness Check"}
+            tags = {"Health Check"}
     )
     public ResponseEntity<String> healthCheck() {
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok("Healthy");
     }
 }

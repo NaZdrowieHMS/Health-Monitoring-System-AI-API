@@ -1,5 +1,6 @@
 package agh.edu.pl.healthmonitoringsystemai.controller;
 
+import agh.edu.pl.healthmonitoringsystemai.exception.AwsApiException;
 import agh.edu.pl.healthmonitoringsystemai.exception.ApiException;
 import agh.edu.pl.healthmonitoringsystemai.exception.HuggingFaceApiException;
 import agh.edu.pl.healthmonitoringsystemai.exception.InvalidImageException;
@@ -45,6 +46,13 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
     @ExceptionHandler(HuggingFaceApiException.class)
     public final ResponseEntity<ErrorResponse> handleHuggingFaceApiException(HuggingFaceApiException ex) {
         log.error("A HuggingFaceApiException occurred: {}", ex.getMessage(), ex);
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(AwsApiException.class)
+    public final ResponseEntity<ErrorResponse> handleAwsApiException(AwsApiException ex) {
+        log.error("A AwsApiException occurred: {}", ex.getMessage(), ex);
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
