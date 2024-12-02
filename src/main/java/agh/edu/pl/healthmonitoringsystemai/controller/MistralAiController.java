@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,9 +44,10 @@ public class MistralAiController {
             },
             tags = {"AI Form Analysis"}
     )
-    public ResponseEntity<AiFormAnalysis> getAiAnalysisBasedOnForm(@Parameter(description = "Form ID") @PathVariable("formId") Long formId) {
+    public ResponseEntity<AiFormAnalysis> getAiAnalysisBasedOnForm(@Parameter(description = "Form ID") @PathVariable("formId") Long formId,
+                                                                   @Parameter(description = "User ID") @RequestHeader(name = "userId") Long userId) {
 
-        AiFormAnalysis aiFormAnalysis = mistralAiService.getAiAnalysisBasedOnForm(formId);
+        AiFormAnalysis aiFormAnalysis = mistralAiService.getAiAnalysisBasedOnForm(formId, userId);
         return ResponseEntity.ok(aiFormAnalysis);
     }
 }

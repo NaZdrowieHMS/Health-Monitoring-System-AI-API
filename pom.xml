@@ -29,7 +29,7 @@
         <dependency>
             <groupId>agh.edu.pl.healthmonitoringsystem</groupId>
             <artifactId>healthmonitoringsystem-shared</artifactId>
-            <version>1.7-SNAPSHOT</version>
+            <version>1.10-SNAPSHOT</version>
         </dependency>
 
         <dependency>
