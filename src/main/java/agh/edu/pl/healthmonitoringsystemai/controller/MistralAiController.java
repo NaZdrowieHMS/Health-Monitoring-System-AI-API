@@ -1,6 +1,6 @@
 package agh.edu.pl.healthmonitoringsystemai.controller;
 
-import agh.edu.pl.healthmonitoringsystem.response.AiFormAnalysis;
+import agh.edu.pl.healthmonitoringsystem.model.FormAiAnalysis;
 import agh.edu.pl.healthmonitoringsystemai.exception.response.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,7 +34,7 @@ public class MistralAiController {
             summary = "Get Ai health report based on a specific form.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful operation",
-                            content = @Content(schema = @Schema(implementation = AiFormAnalysis.class))),
+                            content = @Content(schema = @Schema(implementation = FormAiAnalysis.class))),
                     @ApiResponse(responseCode = "400", description = "Invalid Request",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "404", description = "Not found",
@@ -44,10 +44,10 @@ public class MistralAiController {
             },
             tags = {"AI Form Analysis"}
     )
-    public ResponseEntity<AiFormAnalysis> getAiAnalysisBasedOnForm(@Parameter(description = "Form ID") @PathVariable("formId") Long formId,
+    public ResponseEntity<FormAiAnalysis> getAiAnalysisBasedOnForm(@Parameter(description = "Form ID") @PathVariable("formId") Long formId,
                                                                    @Parameter(description = "User ID") @RequestHeader(name = "userId") Long userId) {
 
-        AiFormAnalysis aiFormAnalysis = mistralAiService.getAiAnalysisBasedOnForm(formId, userId);
+        FormAiAnalysis aiFormAnalysis = mistralAiService.getAiAnalysisBasedOnForm(formId, userId);
         return ResponseEntity.ok(aiFormAnalysis);
     }
 }

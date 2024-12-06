@@ -1,7 +1,7 @@
 package agh.edu.pl.healthmonitoringsystemai.mistralAi;
 
+import agh.edu.pl.healthmonitoringsystem.model.FormAiAnalysis;
 import agh.edu.pl.healthmonitoringsystem.request.AiFormAnalysisRequest;
-import agh.edu.pl.healthmonitoringsystem.response.AiFormAnalysis;
 import agh.edu.pl.healthmonitoringsystem.response.Form;
 import agh.edu.pl.healthmonitoringsystemai.exception.MistralApiException;
 import agh.edu.pl.healthmonitoringsystemai.util.JsonSanitizer;
@@ -44,7 +44,7 @@ public class MistralAIService {
         this.chatModel = new MistralAiChatModel(new MistralAiApi(apiKey));
     }
 
-    public AiFormAnalysis getAiAnalysisBasedOnForm(Long formId, Long userId) {
+    public FormAiAnalysis getAiAnalysisBasedOnForm(Long formId, Long userId) {
         Form form = formService.retrieveFormById(formId);
         Prompt prompt = createPrompt(form);
         ChatResponse chatResponse = executeChatRequest(prompt);

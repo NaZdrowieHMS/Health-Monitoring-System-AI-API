@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import retrofit2.Response;
 
 import java.io.EOFException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +39,7 @@ public class PredictionRequestService {
         log.info("Creating prediction request");
         try {
             Response<PredictionSummary> response = predictionApi.createPredictionRequest(request).execute();
+            System.out.println(response.body());
             if (!response.isSuccessful() || response.body() == null) {
                 throw new ApiException("Error during creation of prediction request: " + response.errorBody());
             }
@@ -72,7 +74,7 @@ public class PredictionRequestService {
             List<Double> confidences = new ArrayList<>();
             List<String> predictions = new ArrayList<>();
 
-            for (Long resultId : predictionSummary.resultIds()) {
+            for (Long resultId : predictionSummary.resultAiAnalysis().resultIds()) {
                 PredictionResult prediction = processResult(resultId, predictionSummary);
 
                 confidences.add(prediction.confidence());

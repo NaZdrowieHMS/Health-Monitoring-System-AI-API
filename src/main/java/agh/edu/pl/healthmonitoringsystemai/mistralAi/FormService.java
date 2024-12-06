@@ -1,8 +1,8 @@
 package agh.edu.pl.healthmonitoringsystemai.mistralAi;
 
 import agh.edu.pl.healthmonitoringsystem.client.FormApi;
+import agh.edu.pl.healthmonitoringsystem.model.FormAiAnalysis;
 import agh.edu.pl.healthmonitoringsystem.request.AiFormAnalysisRequest;
-import agh.edu.pl.healthmonitoringsystem.response.AiFormAnalysis;
 import agh.edu.pl.healthmonitoringsystem.response.Form;
 import agh.edu.pl.healthmonitoringsystemai.client.RetrofitClient;
 import agh.edu.pl.healthmonitoringsystemai.exception.ApiException;
@@ -36,10 +36,10 @@ public class FormService {
         }
     }
 
-    public AiFormAnalysis saveFormAnalysis(AiFormAnalysisRequest aiFormAnalysisRequest) {
+    public FormAiAnalysis saveFormAnalysis(AiFormAnalysisRequest aiFormAnalysisRequest) {
         log.info("Saving form analysis: {}", aiFormAnalysisRequest);
         try {
-            Response<AiFormAnalysis> response = formApi.saveFormAiAnalysis(aiFormAnalysisRequest).execute();
+            Response<FormAiAnalysis> response = formApi.saveFormAiAnalysis(aiFormAnalysisRequest).execute();
             if (response.isSuccessful() && response.body() != null) {
                 return response.body();
             }
