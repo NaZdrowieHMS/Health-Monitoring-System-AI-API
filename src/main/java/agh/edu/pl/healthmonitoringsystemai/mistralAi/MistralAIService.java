@@ -44,13 +44,13 @@ public class MistralAIService {
         this.chatModel = new MistralAiChatModel(new MistralAiApi(apiKey));
     }
 
-    public FormAiAnalysis getAiAnalysisBasedOnForm(Long formId, Long userId) {
-        Form form = formService.retrieveFormById(formId);
+    public FormAiAnalysis getAiAnalysisBasedOnForm(Long patientId, Long userId) {
+        Form form = formService.retrieveLatestForm(patientId, userId);
+        if(form == null) return null;
         Prompt prompt = createPrompt(form);
         ChatResponse chatResponse = executeChatRequest(prompt);
         AiAnalysisOutput aiOutput = parseChatResponse(chatResponse);
-        AiFormAnalysisRequest request = createRequest(aiOutput, form, userId);
-        return formService.saveFormAnalysis(request);
+        return new FormAiAnalysis(form.id(), aiOutput.diagnoses(), aiOutput.recommendations(), form.createDate());
     }
 
     private Prompt createPrompt(Form form) {
