@@ -3,6 +3,7 @@ package agh.edu.pl.healthmonitoringsystemai.breastCancerPredictionAi;
 import agh.edu.pl.healthmonitoringsystem.client.PredictionApi;
 import agh.edu.pl.healthmonitoringsystem.enums.PredictionRequestStatus;
 import agh.edu.pl.healthmonitoringsystem.model.FormAiAnalysis;
+import agh.edu.pl.healthmonitoringsystem.model.ResultAiData;
 import agh.edu.pl.healthmonitoringsystem.request.PredictionSummaryRequest;
 import agh.edu.pl.healthmonitoringsystem.request.PredictionSummaryUpdateRequest;
 import agh.edu.pl.healthmonitoringsystem.request.PredictionUploadRequest;
@@ -23,6 +24,7 @@ import java.io.EOFException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -78,7 +80,11 @@ public class PredictionRequestService {
             List<Double> confidences = new ArrayList<>();
             List<String> predictions = new ArrayList<>();
 
-            for (Long resultId : predictionSummary.resultAiAnalysis().resultIds()) {
+        List<Long> resultIds = predictionSummary.resultAiAnalysis().results().stream()
+                .map(ResultAiData::resultId)
+                .toList();
+
+            for (Long resultId : resultIds) {
                 PredictionResult prediction = processResult(resultId, predictionSummary);
 
                 confidences.add(prediction.confidence());
