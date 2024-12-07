@@ -2,6 +2,7 @@ package agh.edu.pl.healthmonitoringsystemai.breastCancerPredictionAi;
 
 import agh.edu.pl.healthmonitoringsystem.client.PredictionApi;
 import agh.edu.pl.healthmonitoringsystem.enums.PredictionRequestStatus;
+import agh.edu.pl.healthmonitoringsystem.model.FormAiAnalysis;
 import agh.edu.pl.healthmonitoringsystem.request.PredictionSummaryRequest;
 import agh.edu.pl.healthmonitoringsystem.request.PredictionSummaryUpdateRequest;
 import agh.edu.pl.healthmonitoringsystem.request.PredictionUploadRequest;
@@ -11,6 +12,7 @@ import agh.edu.pl.healthmonitoringsystem.response.ResultDataContent;
 import agh.edu.pl.healthmonitoringsystemai.client.RetrofitClient;
 import agh.edu.pl.healthmonitoringsystemai.exception.ApiException;
 import agh.edu.pl.healthmonitoringsystemai.exception.PredictionException;
+import agh.edu.pl.healthmonitoringsystemai.mistralAi.MistralAIService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -28,16 +30,20 @@ public class PredictionRequestService {
     private final PredictionApi predictionApi;
     private final ModelPredictionService modelPredictionService;
 
+    private final MistralAIService mistralAiService;
+
     @Autowired
-    public PredictionRequestService(RetrofitClient retrofitClient, ModelPredictionService modelPredictionService) {
+    public PredictionRequestService(RetrofitClient retrofitClient, ModelPredictionService modelPredictionService, MistralAIService mistralAiService) {
         this.predictionApi = retrofitClient.getRetrofitClient().create(PredictionApi.class);
         this.modelPredictionService = modelPredictionService;
+        this.mistralAiService = mistralAiService;
     }
 
     public RequestResponse createPredictionRequest(PredictionSummaryRequest request) {
         log.info("Creating prediction request");
         try {
             Response<PredictionSummary> response = predictionApi.createPredictionRequest(request).execute();
+            System.out.println(response.body());
             if (!response.isSuccessful() || response.body() == null) {
                 throw new ApiException("Error during creation of prediction request: " + response.errorBody());
             }
@@ -72,26 +78,28 @@ public class PredictionRequestService {
             List<Double> confidences = new ArrayList<>();
             List<String> predictions = new ArrayList<>();
 
-            for (Long resultId : predictionSummary.resultIds()) {
+            for (Long resultId : predictionSummary.resultAiAnalysis().resultIds()) {
                 PredictionResult prediction = processResult(resultId, predictionSummary);
 
                 confidences.add(prediction.confidence());
                 predictions.add(prediction.prediction());
             }
 
+            FormAiAnalysis formPrediction = mistralAiService.getAiAnalysisBasedOnForm(predictionSummary.patientId(), predictionSummary.doctorId());
+
             if (confidences.isEmpty()) {
-                updatePredictionRequestStatus(predictionSummary.id(), PredictionRequestStatus.FAILED, null, null);
+                updatePredictionRequestStatus(predictionSummary.id(), PredictionRequestStatus.FAILED, null, null, null);
                 throw new PredictionException("No predictions were processed for request ID: " + predictionSummary.id());
             }
 
-            completePredictionRequest(predictionSummary.id(), confidences, predictions);
+            completePredictionRequest(predictionSummary.id(), confidences, predictions, formPrediction);
     }
 
-    private void completePredictionRequest(Long predictionRequestId, List<Double> confidences, List<String> predictions) {
+    private void completePredictionRequest(Long predictionRequestId, List<Double> confidences, List<String> predictions, FormAiAnalysis formAiAnalysis) {
         double averageConfidence = countAverageConfidence(confidences);
         String finalPrediction = predictions.get(confidences.indexOf(Collections.max(confidences)));
 
-        updatePredictionRequestStatus(predictionRequestId, PredictionRequestStatus.COMPLETED, averageConfidence, finalPrediction);
+        updatePredictionRequestStatus(predictionRequestId, PredictionRequestStatus.COMPLETED, averageConfidence, finalPrediction, formAiAnalysis);
         log.info(String.format("Prediction completed for prediction request with id %s", predictionRequestId));
     }
 
@@ -149,13 +157,14 @@ public class PredictionRequestService {
 
 
     private void updatePredictionRequestStatus(Long requestId, PredictionRequestStatus predictionRequestStatus,
-                                               Double confidence, String prediction){
+                                               Double confidence, String prediction, FormAiAnalysis formAiAnalysis){
         try {
             PredictionSummaryUpdateRequest updateRequest = new PredictionSummaryUpdateRequest(
                     requestId,
                     predictionRequestStatus,
                     confidence,
-                    prediction
+                    prediction,
+                    formAiAnalysis
             );
             Response<Void> response = predictionApi.updatePredictionRequest(updateRequest).execute();
             if (!response.isSuccessful()) {
