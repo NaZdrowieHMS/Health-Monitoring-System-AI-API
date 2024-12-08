@@ -5,6 +5,7 @@ import agh.edu.pl.healthmonitoringsystem.response.PredictionSummary;
 import agh.edu.pl.healthmonitoringsystemai.breastCancerPredictionAi.PredictionRequestService;
 import agh.edu.pl.healthmonitoringsystemai.breastCancerPredictionAi.RequestResponse;
 import agh.edu.pl.healthmonitoringsystemai.exception.response.ErrorResponse;
+import agh.edu.pl.healthmonitoringsystemai.mistralAi.MistralAIService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,9 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin
 public class PredictionController {
     private final PredictionRequestService predictionRequestService;
+    private final MistralAIService mistralAiService;
 
-    public PredictionController(PredictionRequestService predictionRequestService) {
+    public PredictionController(PredictionRequestService predictionRequestService, MistralAIService mistralAiService) {
         this.predictionRequestService = predictionRequestService;
+        this.mistralAiService = mistralAiService;
     }
 
     @PostMapping
