@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Component
 public class PromptCreator {
 
-    private static final String MESSAGE_TEMPLATE = "Wciel się w role polskiego lekarza. Uzywaj tylko języka polskiego." +
+    private static final String MESSAGE_TEMPLATE = "Wciel się w role polskiego lekarza. Używaj tylko języka polskiego." +
             " Podaj możliwe diagnozy i zalecenia które mógłby zasugerować lekarz na podstawie następujących objawów zdrowotnych pacjenta: \\n{patientData}. " +
             "Dla każdego z parametrów podaj maksymalnie 5 elementów, a minimalnmie 2 elementy {format}";
 
