@@ -21,6 +21,7 @@ public class PromptCreator {
         log.info("Generating prompt");
 
         String patientData = healthForm.content().stream()
+                .filter(entry -> entry.value() != null && !entry.value().equals("false") && !entry.value().isEmpty())
                 .map(entry -> entry.key() + ": " + entry.value())
                 .collect(Collectors.joining("\n"));
 
