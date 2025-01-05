@@ -91,7 +91,7 @@ public class PredictionRequestService {
                 predictions.add(prediction.prediction());
             }
 
-            FormAiAnalysis formPrediction = mistralAiService.getAiAnalysisBasedOnForm(predictionSummary.patientId(), predictionSummary.doctorId());
+            FormAiAnalysis formPrediction = mistralAiService.getAiAnalysisBasedOnForm(predictionSummary.patientId(), predictionSummary.doctorId(), authentication);
 
             if (confidences.isEmpty()) {
                 updatePredictionRequestStatus(predictionSummary.id(), PredictionRequestStatus.FAILED, null, null, null, authentication);

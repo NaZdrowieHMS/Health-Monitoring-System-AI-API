@@ -21,10 +21,10 @@ public class FormService {
         this.formApi = retrofitClient.getRetrofitClient().create(FormApi.class);
     }
 
-    public Form retrieveLatestForm(Long patientId, Long doctorId) {
+    public Form retrieveLatestForm(Long patientId, Long doctorId, String authorization) {
         log.info("Retrieving latest form");
         try {
-            Response<List<Form>> response = formApi.getAllHealthForms(0, 1, doctorId, patientId).execute();
+            Response<List<Form>> response = formApi.getAllHealthForms(0, 1, doctorId, patientId, authorization).execute();
             if (response.isSuccessful() && response.body() != null) {
                 return response.body().stream().findFirst().orElse(null);
             }
