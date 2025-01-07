@@ -13,13 +13,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import retrofit2.http.Header;
+
+import java.util.Map;
 
 
 @RestController
@@ -47,9 +44,13 @@ public class PredictionController {
             },
             tags = {"AI Prediction"}
     )
-    public ResponseEntity<RequestResponse> createPrediction(@Valid @RequestBody PredictionSummaryRequest request) {
+    public ResponseEntity<RequestResponse> createPrediction(@Valid @RequestBody PredictionSummaryRequest request, @RequestHeader Map<String, String> headers) {
+        String authorization = headers.getOrDefault("Authorization", headers.get("authorization"));
+        if (authorization == null) {
+            throw new IllegalArgumentException("Authorization header is missing");
+        }
 
-        RequestResponse response = predictionRequestService.createPredictionRequest(request);
+        RequestResponse response = predictionRequestService.createPredictionRequest(request, authorization);
         return ResponseEntity.accepted().body(response);
     }
 
@@ -67,8 +68,12 @@ public class PredictionController {
             },
             tags = {"AI Prediction"}
     )
-    public ResponseEntity<PredictionSummary> getPredictionStatus(@PathVariable Long requestId) {
-        PredictionSummary summary = predictionRequestService.getPredictionStatus(requestId);
+    public ResponseEntity<PredictionSummary> getPredictionStatus(@PathVariable Long requestId, @RequestHeader Map<String, String> headers) {
+        String authorization = headers.getOrDefault("Authorization", headers.get("authorization"));
+        if (authorization == null) {
+            throw new IllegalArgumentException("Authorization header is missing");
+        }
+        PredictionSummary summary = predictionRequestService.getPredictionStatus(requestId, authorization);
         return ResponseEntity.ok(summary);
     }
 }

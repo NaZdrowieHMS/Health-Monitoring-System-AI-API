@@ -44,8 +44,8 @@ public class MistralAIService {
         this.chatModel = new MistralAiChatModel(new MistralAiApi(apiKey));
     }
 
-    public FormAiAnalysis getAiAnalysisBasedOnForm(Long patientId, Long userId) {
-        Form form = formService.retrieveLatestForm(patientId, userId);
+    public FormAiAnalysis getAiAnalysisBasedOnForm(Long patientId, Long userId, String authorization) {
+        Form form = formService.retrieveLatestForm(patientId, userId, authorization);
         if(form == null) return null;
         Prompt prompt = createPrompt(form);
         ChatResponse chatResponse = executeChatRequest(prompt);

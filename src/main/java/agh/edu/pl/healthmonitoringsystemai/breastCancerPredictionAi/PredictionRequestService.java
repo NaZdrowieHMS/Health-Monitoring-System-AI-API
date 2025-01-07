@@ -41,17 +41,17 @@ public class PredictionRequestService {
         this.mistralAiService = mistralAiService;
     }
 
-    public RequestResponse createPredictionRequest(PredictionSummaryRequest request) {
+    public RequestResponse createPredictionRequest(PredictionSummaryRequest request, String authentication) {
         log.info("Creating prediction request");
         try {
-            Response<PredictionSummary> response = predictionApi.createPredictionRequest(request).execute();
+            Response<PredictionSummary> response = predictionApi.createPredictionRequest(request, authentication).execute();
             System.out.println(response.body());
             if (!response.isSuccessful() || response.body() == null) {
                 throw new ApiException("Error during creation of prediction request: " + response.errorBody());
             }
 
             PredictionSummary predictionSummary = response.body();
-            processPredictionAsync(predictionSummary);
+            processPredictionAsync(predictionSummary, authentication);
             return new RequestResponse(predictionSummary.id());
 
         } catch (Exception e) {
@@ -60,10 +60,10 @@ public class PredictionRequestService {
         }
     }
 
-    public PredictionSummary getPredictionStatus(Long requestId) {
+    public PredictionSummary getPredictionStatus(Long requestId, String authentication) {
         log.info("Fetching prediction request");
         try {
-            Response<PredictionSummary> response = predictionApi.getPredictionSummaryRequestById(requestId).execute();
+            Response<PredictionSummary> response = predictionApi.getPredictionSummaryRequestById(requestId, authentication).execute();
             if (!response.isSuccessful() || response.body() == null) {
                 throw new ApiException("Error during fetching prediction request: " + response.errorBody());
             }
@@ -76,7 +76,7 @@ public class PredictionRequestService {
     }
 
     @Async
-    protected void processPredictionAsync(PredictionSummary predictionSummary) {
+    protected void processPredictionAsync(PredictionSummary predictionSummary, String authentication) {
             List<Double> confidences = new ArrayList<>();
             List<String> predictions = new ArrayList<>();
 
@@ -85,33 +85,33 @@ public class PredictionRequestService {
                 .toList();
 
             for (Long resultId : resultIds) {
-                PredictionResult prediction = processResult(resultId, predictionSummary);
+                PredictionResult prediction = processResult(resultId, predictionSummary, authentication);
 
                 confidences.add(prediction.confidence());
                 predictions.add(prediction.prediction());
             }
 
-            FormAiAnalysis formPrediction = mistralAiService.getAiAnalysisBasedOnForm(predictionSummary.patientId(), predictionSummary.doctorId());
+            FormAiAnalysis formPrediction = mistralAiService.getAiAnalysisBasedOnForm(predictionSummary.patientId(), predictionSummary.doctorId(), authentication);
 
             if (confidences.isEmpty()) {
-                updatePredictionRequestStatus(predictionSummary.id(), PredictionRequestStatus.FAILED, null, null, null);
+                updatePredictionRequestStatus(predictionSummary.id(), PredictionRequestStatus.FAILED, null, null, null, authentication);
                 throw new PredictionException("No predictions were processed for request ID: " + predictionSummary.id());
             }
 
-            completePredictionRequest(predictionSummary.id(), confidences, predictions, formPrediction);
+            completePredictionRequest(predictionSummary.id(), confidences, predictions, formPrediction, authentication);
     }
 
-    private void completePredictionRequest(Long predictionRequestId, List<Double> confidences, List<String> predictions, FormAiAnalysis formAiAnalysis) {
+    private void completePredictionRequest(Long predictionRequestId, List<Double> confidences, List<String> predictions, FormAiAnalysis formAiAnalysis, String authentication) {
         double averageConfidence = countAverageConfidence(confidences);
         String finalPrediction = predictions.get(confidences.indexOf(Collections.max(confidences)));
 
-        updatePredictionRequestStatus(predictionRequestId, PredictionRequestStatus.COMPLETED, averageConfidence, finalPrediction, formAiAnalysis);
+        updatePredictionRequestStatus(predictionRequestId, PredictionRequestStatus.COMPLETED, averageConfidence, finalPrediction, formAiAnalysis, authentication);
         log.info(String.format("Prediction completed for prediction request with id %s", predictionRequestId));
     }
 
-    private PredictionResult processResult(Long resultId, PredictionSummary predictionSummary) {
+    private PredictionResult processResult(Long resultId, PredictionSummary predictionSummary, String authentication) {
         try {
-            Response<Prediction> response = predictionApi.getPredictionForResult(resultId).execute();
+            Response<Prediction> response = predictionApi.getPredictionForResult(resultId, authentication).execute();
 
             if (response.isSuccessful() && response.body() != null) {
                 Prediction existingPrediction = response.body();
@@ -124,7 +124,7 @@ public class PredictionRequestService {
         } catch (Exception e) {
             log.error("Error processing resultId: {}", resultId, e);
         }
-        return processNewPredictionForResult(resultId, predictionSummary);
+        return processNewPredictionForResult(resultId, predictionSummary, authentication);
     }
 
     private void handleErrorResponse(Response<?> response, String context) throws ApiException {
@@ -133,9 +133,9 @@ public class PredictionRequestService {
         throw new ApiException(String.format("API error during %s: %s", context, errorBody), response.code());
     }
 
-    private PredictionResult processNewPredictionForResult(Long resultId, PredictionSummary predictionSummary) {
+    private PredictionResult processNewPredictionForResult(Long resultId, PredictionSummary predictionSummary, String authentication) {
         try {
-            ResultDataContent resultData = predictionApi.getPredictionDataFromResult(resultId).execute().body();
+            ResultDataContent resultData = predictionApi.getPredictionDataFromResult(resultId, authentication).execute().body();
             if (resultData == null) {
                 throw new PredictionException("No data available for resultId: " + resultId);
             }
@@ -148,7 +148,7 @@ public class PredictionRequestService {
                     newPredictionResult.confidence(),
                     newPredictionResult.prediction()
             );
-            Response<Prediction> response = predictionApi.uploadPrediction(uploadRequest).execute();
+            Response<Prediction> response = predictionApi.uploadPrediction(uploadRequest, authentication).execute();
 
             if (response.isSuccessful() && response.body() != null) {
                 return newPredictionResult;
@@ -163,7 +163,7 @@ public class PredictionRequestService {
 
 
     private void updatePredictionRequestStatus(Long requestId, PredictionRequestStatus predictionRequestStatus,
-                                               Double confidence, String prediction, FormAiAnalysis formAiAnalysis){
+                                               Double confidence, String prediction, FormAiAnalysis formAiAnalysis, String authentication){
         try {
             PredictionSummaryUpdateRequest updateRequest = new PredictionSummaryUpdateRequest(
                     requestId,
@@ -172,7 +172,7 @@ public class PredictionRequestService {
                     prediction,
                     formAiAnalysis
             );
-            Response<Void> response = predictionApi.updatePredictionRequest(updateRequest).execute();
+            Response<Void> response = predictionApi.updatePredictionRequest(updateRequest, authentication).execute();
             if (!response.isSuccessful()) {
                 String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
                 throw new ApiException(String.format("Error updating prediction request: %s", errorBody), response.code());
